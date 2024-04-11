@@ -1,0 +1,4 @@
+x: | label must be in separate line
+LONG(0)	| label x points to where 20 is stored
+y: 
+LONG(0) | label y points to where 0 is stored
