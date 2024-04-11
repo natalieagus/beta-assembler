@@ -16,7 +16,7 @@ expression_pattern = re.compile(r"(\d|\))[ \t]+?(\(|\d)")
 
 output_formatter = {
     "bin": (bin, 8, "b"),
-    "hex": (hex, 2, "x"),
+    "hex": (hex, 2, "h"),
 }
 
 
