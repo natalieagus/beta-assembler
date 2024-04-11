@@ -1,0 +1,305 @@
+delay = 1
+
+init:
+CMOVE(0, R26)
+SVC()
+BEQ(R0, init, R31)
+
+SHRC(R0, 4, R0) || Shift R0 right by 4 bits to get MSB of 5-bit value
+BF(R0, init, R31) || If MSB == 1, means we pressed the start button, continue, else branch back to start and wait for button input
+CMOVE(1, R26) || Add 1 to our level count R26
+
+MOVE(R31, R23) || Set our 'currently selected peg' register to be 0
+CMOVE(1, R24)
+MOVE(R31, R25) || Set our 'possible moves' register to be 0
+game_start_light_loop:
+ADDC(R23, 1, R23)
+BR(noop_loop_entry_point, XP)
+SHLC(R24, 1, R24)
+CMPEQC(R23, 15, R1)
+BF(R1, game_start_light_loop, R31)
+MOVE(R31, R23)
+MOVE(R31, R24)
+
+start:
+|| If R26 == 1, branch to level_one_setup
+CMPEQC(R26,1,R0) || if R26 == 1, then R0 is 1, else R0 is 0
+BT(R0, level_one_setup, R31) 
+|| elif R26 == 2, branch to level_two_setup
+CMPEQC(R26,2,R0)
+BT(R0, level_two_setup, R31)
+|| elif R26 == 3, branch to level_three_setup
+CMPEQC(R26,3,R0)
+BT(R0, level_three_setup, R31)
+BR(game_end)
+
+level_one_setup:
+RAND(R0)    || Random value 0-15
+SHRC(R0, 2, R0)     || Random value 0-3
+LD(R0, level_one_position, R21) || Load level two peg positions to R24
+BF(R31, array_setup, R31) || Branch to array_setup
+
+level_two_setup:
+RAND(R0)    || Random value 0-15
+SHRC(R0, 2, R0)     || Random value 0-3
+LD(R0, level_two_position, R21) || Load level two peg positions to R24
+BF(R31, array_setup, R31) || Branch to array_setup
+
+level_three_setup: 
+RAND(R0) || Store random value to R0
+CMOVE(1, R1)    || Set 1 to R1
+BT(R0, not_zero, R31)
+ADDC(R0, 1, R0)
+not_zero:
+SUBC(R0, 1, R0)
+SHL(R1, R0, R1)     || SHL with R0 as offset (0-15)
+XORC(R1, 0x7fff, R21)    || XOR with one-hot R1
+BF(R31, array_setup, R31) || Branch to array_setup
+
+array_setup: 
+CMOVE(0, R1) || Set R1 to 0 to use as our counter
+CMOVE(1, R0) || Set R0 to 1 to use as our mask
+MOVE(R21, R24)  || Bodge; the group wants to be able to reload the same level
+
+array_setup_loop: 
+SHR(R21, R1, R2) || to get the i-th peg as the LSB
+AND(R2, R0, R3) || returns 1 if a peg is at the i-th position, and 0 if there is no peg
+SHLC(R1, 1, R4) || gives us the array index, accounting for the 2-byte indexing of our data memory
+ST(R3, pegboard_array, R4) || stores our result of whether there is a peg in the i-th position in our data memory
+ADDC(R1, 1, R1)
+|| If R1 == 15, we have written our entire pegboard to our array, continue with game
+CMPEQC(R1,15,R5) || if R1 == 15, then R5 is 1, else R5 is 0
+BF(R5, array_setup_loop, R31) || Else, branch back to array_setup
+
+game_start:
+MOVE(R31, R23) || Set our 'currently selected peg' register to be 0
+MOVE(R31, R25) || Set our 'possible moves' register to be 0
+
+a_input:
+SVC()
+BEQ(R0, a_input, R31)
+
+SHRC(R0, 4, R1) || Shift R0 right by 4 bits to get MSB of 5-bit value
+BT(R1, array_setup, R31) || If MSB == 1, means we pressed the start button, continue, else branch back to start and wait for button input
+
+SUBC(R0, 1, R1)
+SHR(R24, R1, R2)    || Shift right by ID - 1 bits, then AND the result with 1 and store to R2
+ANDC(R2, 1, R2)
+BEQ(R2, a_input, R31) || If R2 == 0, there is no peg, so branch to a_input to await new button press
+
+|| R0 contains the peg we are checking now
+|| R1 contains peg - 1
+MOVE(R31, R2) || Initialize a register R2 to be used as a counter that counts from 0 to 4 (4 corresponds to the max number of moves from a peg position).
+MOVE(R31, R3) || Set R3 to be 0. This will be used to store our potential jump destinations
+SHLC(R1, 3, R1) || Convert our ID - 1 to an array index
+check_a_position:
+LD(R1, jump_array, R4)  || contains our constraints, stored as {space, peg}
+
+BEQ(R4, any_position_exist_check, R31)
+
+SHRC(R4, 8, R5)     || R5 stores space position
+SUBC(R5, 1, R7)
+SHLC(R7, 1, R7)     || R7 stores array index of space position
+
+SHLC(R4, 8, R6)
+SHRC(R6, 8, R6)     || R6 stores peg position
+SUBC(R6, 1, R8)
+SHLC(R8, 1, R8)     || R8 stores array index of peg position
+
+LD(R7, pegboard_array, R9)  || Get status of peg at space position
+LD(R8, pegboard_array, R10)  || Get status of peg at peg position
+
+CMPLE(R10, R9, R11)
+BF(R11, add_position, R31)
+
+ADDC(R2, 1, R2)
+ADDC(R1, 2, R1)
+CMPEQC(R2, 4, R8)
+BF(R8, check_a_position, R31)
+BT(R8, any_position_exist_check, R31)
+
+add_position:
+SUBC(R5, 1, R5)
+CMOVE(1, R6)
+SHL(R6, R5, R6)
+OR(R6, R3, R3)
+
+ADDC(R2, 1, R2)
+ADDC(R1, 2, R1)
+CMPEQC(R2, 4, R8)
+BF(R8, check_a_position, R31)
+
+any_position_exist_check:
+BF(R3, a_input, R31)    || Invalid selection; branch back to a_input
+MOVE(R3, R25)           || Store possible moves
+MOVE(R0, R23)           || Store current button press
+
+b_input:
+SVC()
+BEQ(R0, b_input, R31)
+
+SHRC(R0, 4, R1) || Shift R0 right by 4 bits to get MSB of 5-bit value
+BT(R1, array_setup, R31) || If MSB == 1, means we pressed the start button, continue, else branch back to start and wait for button input
+
+CMPEQ(R0, R23, R1)  || Check whether b_input == a_input
+BT(R1, game_start, R31)
+
+SUBC(R0, 1, R1)
+CMOVE(1, R2)
+SHL(R2, R1, R2)         || Create our b_input bitmask
+AND(R25, R2, R2)
+BF(R2, b_input, R31)   
+SUBC(R23, 1, R1)
+SHLC(R1, 3, R1)        || Get our selected peg's array index
+
+|| TODO: Build in error checking (after 4 cycles, consider it as invalid position, since there can be at most 4 possible moves)
+|| Right now its just looping in the event that there is no valid position; bad code
+peg_search:
+LD(R1, jump_array, R2)  || contains our constraints, stored as {space, peg}
+SHRC(R2, 8, R3)     || R3 stores space position
+SHLC(R2, 8, R4)
+SHRC(R4, 8, R4)     || R4 stores peg position
+CMPEQ(R3, R0, R5)   || If our b_input == R3, then we have found our space position and peg position
+ADDC(R1, 2, R1)     || Go to next index
+BF(R5, peg_search, R31)
+
+|| At this point, R23 contains our starting peg, R3 contains our space position, R4 contains our peg position
+|| Toggle all lights
+SUBC(R23, 1, R1)
+CMOVE(1, R2)
+SHL(R2, R1, R2)
+XOR(R24, R2, R24)
+
+SUBC(R3, 1, R1)
+CMOVE(1, R2)
+SHL(R2, R1, R2)
+XOR(R24, R2, R24)
+
+SUBC(R4, 1, R1)
+CMOVE(1, R2)
+SHL(R2, R1, R2)
+XOR(R24, R2, R24)
+
+array_store: 
+MOVE(R31, R1) || Set R1 to 0 to use as our counter
+CMOVE(1, R0) || Set R0 to 1 to use as our mask
+
+array_store_loop: 
+SHR(R24, R1, R2) || to get the i-th peg as the LSB
+AND(R2, R0, R3) || returns 1 if a peg is at the i-th position, and 0 if there is no peg
+SHLC(R1, 1, R4) || gives us the array index, accounting for the 2-byte indexing of our data memory
+ST(R3, pegboard_array, R4) || stores our result of whether there is a peg in the i-th position in our data memory
+ADDC(R1, 1, R1)
+|| If R1 == 15, we have written our entire pegboard to our array, continue with game
+CMPEQC(R1,15,R5) || if R1 == 15, then R5 is 1, else R5 is 0
+BF(R5, array_store_loop, R31) || Else, branch back to array_setup
+
+count_pegs_setup:
+MOVE(R24, R1)
+MOVE(R31, R0)
+CMOVE(1, R2)        		      || Set content of R2 to our bitmask
+
+count_pegs:
+AND(R1, R2, R3)        			  || Mask off LSB to R3
+BEQ(R3, count_pegs_skip, R31)     || If R3 == 0, dont increment by 1
+ADDC(R0, 1, R0)         		  || Increment peg count by 1
+
+count_pegs_skip:
+SHRC(R1, 1, R1)
+BNE(R1, count_pegs, R31)          || Loop if there are still pegs
+
+CMPEQC(R0, 1, R0)                 || If counted only 1 peg, end level
+BF(R0, game_start, R31)           || Else, repeat game loop
+
+level_end:
+ADDC(R26, 1, R26)   || Increment level counter by 1
+MOVE(R31, R23) || Set our 'currently selected peg' register to be 0
+MOVE(R31, R24)
+MOVE(R31, R25) || Set our 'possible moves' register to be 0
+CMPEQC(R26, 3, R0)
+BT(R0, level_two_end)
+CMPEQC(R26, 4, R0)
+BT(R0, start)
+
+level_one_end:
+CMOVE(-1, R24)
+level_one_end_light_loop:
+SHRC(R24, 1, R24)
+BR(noop_loop_entry_point, XP)
+BT(R24, level_one_end_light_loop, R31)
+BF(R31, start, R31)
+
+level_two_end:
+CMOVE(-1, R25)
+level_two_end_light_loop:
+SHRC(R25, 1, R25)
+BR(noop_loop_entry_point, XP)
+BT(R25, level_two_end_light_loop, R31)
+BF(R31, start, R31)
+
+game_end:                           || Disclaimer: I would've written the NOP loop as a function if I wasn't lazy          
+CMOVE(-1, R23)                      ||             I swear my work is normally better than this
+MOVE(R31, R24)
+MOVE(R31, R25)
+game_end_light_loop_one:
+SHRC(R23, 1, R23)
+BR(noop_loop_entry_point, XP)
+BT(R23, game_end_light_loop_one, R31)
+
+CMOVE(-1, R24)
+MOVE(R31, R23)
+MOVE(R31, R25)
+game_end_light_loop_two:
+SHRC(R24, 1, R24)
+BR(noop_loop_entry_point, XP)
+BT(R24, game_end_light_loop_two, R31)
+
+CMOVE(-1, R25)
+MOVE(R31, R23)
+MOVE(R31, R24)
+game_end_light_loop_three:
+SHRC(R25, 1, R25)
+BR(noop_loop_entry_point, XP)
+BT(R25, game_end_light_loop_three, R31)
+
+CMOVE(-1, R23)                          || Flash green triangle on and off once
+MOVE(R31, R24)
+MOVE(R31, R25)
+BR(noop_loop_entry_point, XP)
+
+MOVE(R31, R23)
+BR(noop_loop_entry_point, XP)
+
+CMOVE(-1, R24)                          || Flash blue triangle on and off once
+MOVE(R31, R23)
+MOVE(R31, R25)
+BR(noop_loop_entry_point, XP)
+
+MOVE(R31, R24)
+BR(noop_loop_entry_point, XP)
+
+CMOVE(-1, R25)                          || Flash red triangle on and off once
+MOVE(R31, R23)
+MOVE(R31, R24)
+BR(noop_loop_entry_point, XP)
+
+MOVE(R31, R25)
+BR(noop_loop_entry_point, XP)
+BR(init)
+
+noop_loop_entry_point:
+CMOVE(1, R0)
+noop_loop:
+NOP()
+SUBC(R0, 1, R0)
+BNE(R0, noop_loop, R31)
+JMP(XP, R31)
+
+. = 1536
+button_handler:
+MOVE(R31, R22)
+button_handler_loop:
+BEQ(R22, button_handler_loop, R31)
+MOVE(R22, R0)
+MOVE(R31, R22)
+JMP(XP, R31)
