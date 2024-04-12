@@ -7,22 +7,24 @@ The assembler expects a separate instruction and data memory files. Place your d
 Usage:
 
 ```
-python assembler_output.py -x ./files/test
+python assembler_wrapper.py [INPUT_FILENAME] [b|x]
 ```
 
-This will read `./files/test.uasm` (instruction memory) content and `./files/test_data.uasm` (data memory) content, and dump the hex output as `./files/test.hex` and `./files/test_data.hex` accordingly. The file format in the name, `.uasm` is **automatically** added.
+1. `[INPUT_FILENAME]` is your `.uasm` file, both DATA and INSTRUCTION must have the SAME name, but the data file to have `_data` suffix
+2. `b` stands for binary input, `x` for hex
+
+For instance:
+
+```
+python assembler_wrapper.py files/test -b
+python assembler_wrapper.py files/test -x
+```
 
 We reverse the hex dump because the lowest address is at the bottom for Lucid
 
 Store is TWO cycles because our FPGA RAM requires 2 cycles to write, and make sure it's readable.
 
-For other options:
-
-```
-python assembler_output.py -h
-```
-
-By default, we use beta_16 (ALU 16 bits). Feel free to change it to beta_32 in `assembler_output` header.
+By default, we use beta_16 (ALU 16 bits). Feel free to change it to beta_32 in `assembly.py` header.
 
 ## Labels
 

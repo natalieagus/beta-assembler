@@ -1,5 +1,6 @@
 import pathlib
 import re
+import sys 
 
 import beta_16 as beta
 import shunting_yard
@@ -305,3 +306,10 @@ def arr_to_str(data, input_format, output_format):
                 for i in range(0, len(data), (beta.instruction_width // 8))
             ][::-1]
         )
+
+if __name__ == "__main__":
+    filename = sys.argv[1]
+    output_filename = filename + ".hex"
+    file_type = sys.argv[2]; # "instr" or "data" 
+    parse_asm_file(input_filename=filename, output_filename=output_filename, existing_labels=None, input_format=file_type, output_format="hex")
+    
