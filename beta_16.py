@@ -265,4 +265,4 @@ SERVER = lambda: PRIV_OP(8)
 
 # SVC calls; used for OS extensions
 # OPCODE for syscall is 0x1A
-SVC = lambda: betaopc(0b011010, 0, 0, 0)
+SVC = lambda: betaopc(0x01, 0, 0, 0)

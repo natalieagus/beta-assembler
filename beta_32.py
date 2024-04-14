@@ -387,4 +387,4 @@ SERVER = lambda: PRIV_OP(8)
 
 # SVC calls; used for OS extensions
 # OPCODE for SVC is 0x01
-SVC = lambda code: betaopc(0x01, 0, code, 0)
+SVC = lambda: betaopc(0x01, 0, 0, 0)
