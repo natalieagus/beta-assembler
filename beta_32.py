@@ -126,7 +126,7 @@ output_size = 2
 
 # Instruction and memory size in bits
 instruction_width = 32
-memory_width = 32
+memory_width = 16 
 
 # register designators
 # this allows symbols like r0, etc to be used as
@@ -387,4 +387,4 @@ SERVER = lambda: PRIV_OP(8)
 
 # SVC calls; used for OS extensions
 # OPCODE for SVC is 0x01
-SVC = lambda: betaopc(0x01, 0, 0, 0)
+SVC = lambda code: betaopc(0x01, 0, code, 0)

@@ -2,7 +2,7 @@ import pathlib
 import re
 import sys 
 
-import beta_16 as beta
+import beta_32 as beta
 import shunting_yard
 from helper_functions import is_number
 

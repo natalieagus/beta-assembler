@@ -2,7 +2,7 @@ delay = 1
 
 init:
 CMOVE(0, R26)
-SVC()
+SVC(2)
 BEQ(R0, init, R31)
 
 SHRC(R0, 4, R0) || Shift R0 right by 4 bits to get MSB of 5-bit value
@@ -76,7 +76,7 @@ MOVE(R31, R23) || Set our 'currently selected peg' register to be 0
 MOVE(R31, R25) || Set our 'possible moves' register to be 0
 
 a_input:
-SVC()
+SVC(2)
 BEQ(R0, a_input, R31)
 
 SHRC(R0, 4, R1) || Shift R0 right by 4 bits to get MSB of 5-bit value
@@ -135,7 +135,7 @@ MOVE(R3, R25)           || Store possible moves
 MOVE(R0, R23)           || Store current button press
 
 b_input:
-SVC()
+SVC(2)
 BEQ(R0, b_input, R31)
 
 SHRC(R0, 4, R1) || Shift R0 right by 4 bits to get MSB of 5-bit value
@@ -294,6 +294,7 @@ NOP()
 SUBC(R0, 1, R0)
 BNE(R0, noop_loop, R31)
 JMP(XP, R31)
+NOP()
 
 . = 1536
 button_handler:
