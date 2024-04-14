@@ -1,4 +1,6 @@
 x: | label must be in separate line
-LONG(0)	| label x points to where 20 is stored
+LONG(0)	| label x points to where 20 is stored, this is 32-bit data
 y: 
 LONG(0) | label y points to where 0 is stored
+LONG(3)
+LONG(4)

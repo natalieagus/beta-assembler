@@ -119,7 +119,7 @@ def STORAGE(NWORDS):
 
 
 def betaop(OP, RA, RB, RC):
-    align(2)
+    align(4)
     # LONG() will convert to little-endian
     # If we want big-endian, return the arg instead
     return LONG(
@@ -128,7 +128,7 @@ def betaop(OP, RA, RB, RC):
 
 
 def betaopc(OP, RA, CC, RC):
-    align(2)
+    align(4)
     # LONG() will convert to little-endian
     # If we want big-endian, return the arg instead
     return LONG((OP << 26) + ((RC % 0x20) << 21) + ((RA % 0x20) << 16) + (CC % 0x10000))
@@ -143,6 +143,10 @@ ADD = lambda RA, RB, RC: betaop(0b100000, RA, RB, RC)
 ADDC = lambda RA, C, RC: betaopc(0b110000, RA, C, RC)
 AND = lambda RA, RB, RC: betaop(0b101000, RA, RB, RC)
 ANDC = lambda RA, C, RC: betaopc(0b111000, RA, C, RC)
+MUL = lambda RA, RB, RC: betaop(0x22, RA, RB, RC)
+MULC = lambda RA, C, RC: betaopc(0x32, RA, C, RC)
+DIV = lambda RA, RB, RC: betaop(0x23, RA, RB, RC)
+DIVC = lambda RA, C, RC: betaopc(0x33, RA, C, RC)
 OR = lambda RA, RB, RC: betaop(0b101001, RA, RB, RC)
 ORC = lambda RA, C, RC: betaopc(0b111001, RA, C, RC)
 SHL = lambda RA, RB, RC: betaop(0b101100, RA, RB, RC)
@@ -188,7 +192,7 @@ def ST(RC, CC, RA=31):
     # Have to call twice because the Alchitry AU memory takes 2 clock cycles to store and load
     return betaopc(0b011001, RA, CC, RC) * 2
 
-
+LDR = lambda CC, RC: BETABR(0x1F, R31, RC, CC)
 MOVE = lambda RA, RC: ADD(RA, R31, RC)
 CMOVE = lambda CC, RC: ADDC(R31, CC, RC)
 
@@ -260,4 +264,5 @@ SEED = lambda: PRIV_OP(7)
 SERVER = lambda: PRIV_OP(8)
 
 # SVC calls; used for OS extensions
+# OPCODE for syscall is 0x1A
 SVC = lambda: betaopc(0b011010, 0, 0, 0)
