@@ -320,11 +320,13 @@ CMOVE = lambda CC, RC: ADDC(R31, CC, RC)
 
 
 def PUSH(RA):
-    return [ADDC(SP, 4, SP), ST(RA, -4, SP)]
+    instructions = [ADDC(SP, 4, SP), ST(RA, -4, SP)]
+    return [item for sublist in instructions for item in sublist]
 
 
 def POP(RA):
-    return [LD(SP, -4, RA), ADDC(SP, -4, SP)]
+    instructions = [LD(SP, -4, RA), ADDC(SP, -4, SP)]
+    return [item for sublist in instructions for item in sublist]
 
 
 RTN = lambda: JMP(LP)

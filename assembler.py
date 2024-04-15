@@ -1,6 +1,7 @@
 import pathlib
 import re
 import sys 
+import traceback
 
 import beta_32 as beta
 import shunting_yard
@@ -237,7 +238,6 @@ def parse_asm(data_memory, existing_labels=None, output_format="bin"):
                                 raise Exception(
                                     f"Invalid argument {arg} at instruction {match.group(0)}"
                                 )
-
                     instructions = getattr(beta, name)(*args)
                     beta.dot, data = write_data(instructions, beta.dot, data)
                 else:
@@ -292,20 +292,24 @@ def arr_to_str(data, input_format, output_format):
     Converts an array of bytes to a string
     """
     output_prefix = output_formatter[output_format][2]
-    if input_format == "data":
-        return "\n".join(
-            [
-                f"{output_prefix}{''.join(data[i : min(i + (beta.memory_width // 8), len(data))][::-1])},"
-                for i in range(0, len(data), (beta.memory_width // 8))
-            ][::-1]
-        )
-    else:
-        return "\n".join(
-            [
-                f"{output_prefix}{''.join(data[i : min(i + (beta.instruction_width // 8), len(data))][::-1])},"
-                for i in range(0, len(data), (beta.instruction_width // 8))
-            ][::-1]
-        )
+    try:
+        if input_format == "data":
+            return "\n".join(
+                [
+                    f"{output_prefix}{''.join(data[i : min(i + (beta.memory_width // 8), len(data))][::-1])},"
+                    for i in range(0, len(data), (beta.memory_width // 8))
+                ][::-1]
+            )
+        else:
+            return "\n".join(
+                [
+                    f"{output_prefix}{''.join(data[i : min(i + (beta.instruction_width // 8), len(data))][::-1])},"
+                    for i in range(0, len(data), (beta.instruction_width // 8))
+                ][::-1]
+            )
+    except Exception:
+        print(traceback.format_exc())
+        
 
 if __name__ == "__main__":
     filename = sys.argv[1]
