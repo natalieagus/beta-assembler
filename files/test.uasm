@@ -12,6 +12,10 @@ BEQ(R0, start, R31) | loop
 HALT()
 NOP()
 NOP()
+PUSH(R1)
+PUSH(R2)
+POP(R2)
+POP(R1)
 
 . = 64
 LD(R31, x, R2) | test write instruction at separate address
