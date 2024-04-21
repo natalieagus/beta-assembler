@@ -126,7 +126,7 @@ output_size = 2
 
 # Instruction and memory size in bits
 instruction_width = 32
-memory_width = 16 
+memory_width = 32 
 
 # register designators
 # this allows symbols like r0, etc to be used as
@@ -303,8 +303,24 @@ JMP = lambda RA, RC=31: betaopc(0x1B, RA, 0, RC)
 # )  # Janky default args since Python doesn't allow non-default args after a default arg
 # ST = lambda RC, CC, RA=31: betaopc(0x19, RA, CC, RC)
 
+def ld_argument_adjuster(func):
+    def wrapper(*args):
+        if len(args) == 2:
+            # If only two arguments are provided, interpret them as (CC, RC)
+            # and set RA to the default value of 31.
+            CC, RC = args
+            RA = 31
+        elif len(args) == 3:
+            # If three arguments are provided, interpret them normally.
+            RA, CC, RC = args
+        else:
+            raise ValueError("LD function requires 2 or 3 arguments.")
+        return func(RA, CC, RC)
+    return wrapper
 
+@ld_argument_adjuster
 def LD(RA=31, CC=0, RC=31):
+    
     # Have to call twice because the Alchitry AU memory takes 2 clock cycles to store and load
     return betaopc(0x18, RA, CC, RC) * 2
 

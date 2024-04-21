@@ -238,6 +238,7 @@ def parse_asm(data_memory, existing_labels=None, output_format="bin"):
                                 raise Exception(
                                     f"Invalid argument {arg} at instruction {match.group(0)}"
                                 )
+               
                     instructions = getattr(beta, name)(*args)
                     beta.dot, data = write_data(instructions, beta.dot, data)
                 else:
