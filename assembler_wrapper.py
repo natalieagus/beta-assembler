@@ -45,19 +45,6 @@ if __name__ == "__main__":
             output_filename = args.out
         else:
             output_filename = input_filename
-        # try:
-        #     self.file = sys.argv[1]
-        # except IndexError as _:
-        #     # Filename not passed
-        #     self.file = None
-
-        # if self.file is None:
-        #     self.body = PanelWidget(
-        #         Panel(
-        #             "Please specify a [italic cyan]filename[/italic cyan], where:\n- The [magenta]instruction memory[/magenta] can be found in [italic cyan]filename.uasm[/italic cyan],\n- The [yellow]optional[/yellow] [magenta]data memory[/magenta] can be found in [italic cyan]filename_data.uasm[/italic cyan].",
-        #             title="[bold red]Error:[/bold red] No file specified.",
-        #         )
-        #     )
 
         data_mem, data_labels = parse_asm_file(
             input_filename=f"{input_filename}_data.uasm",

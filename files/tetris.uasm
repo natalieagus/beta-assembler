@@ -1,0 +1,50 @@
+| tetris.uasm
+| Demo: stores pieces into TETRIS_BOARD (22 rows x 12 cols)
+| Cell (row, col) offset = (row * 12 + col) * 4
+| ST(R1, TETRIS_BOARD, R2) writes reg[R1] to TETRIS_BOARD + reg[R2]
+
+CMOVE(1, R1)    | R1 = 1 (filled)
+CMOVE(0, R2)    | R2 = byte offset
+
+| T-piece (r1-2, c4-6)
+ADDC(R31, 64, R2)    | (1,4) offset=64
+ST(R1, TETRIS_BOARD, R2)
+
+ADDC(R31, 68, R2)    | (1,5) offset=68
+ST(R1, TETRIS_BOARD, R2)
+
+ADDC(R31, 72, R2)    | (1,6) offset=72
+ST(R1, TETRIS_BOARD, R2)
+
+ADDC(R31, 116, R2)    | (2,5) offset=116
+ST(R1, TETRIS_BOARD, R2)
+
+| I-piece (r3-6, c9)
+ADDC(R31, 180, R2)    | (3,9) offset=180
+ST(R1, TETRIS_BOARD, R2)
+
+ADDC(R31, 228, R2)    | (4,9) offset=228
+ST(R1, TETRIS_BOARD, R2)
+
+ADDC(R31, 276, R2)    | (5,9) offset=276
+ST(R1, TETRIS_BOARD, R2)
+
+ADDC(R31, 324, R2)    | (6,9) offset=324
+ST(R1, TETRIS_BOARD, R2)
+
+| S-piece (r8-9, c4-6)
+ADDC(R31, 404, R2)    | (8,5) offset=404
+ST(R1, TETRIS_BOARD, R2)
+
+ADDC(R31, 408, R2)    | (8,6) offset=408
+ST(R1, TETRIS_BOARD, R2)
+
+ADDC(R31, 448, R2)    | (9,4) offset=448
+ST(R1, TETRIS_BOARD, R2)
+
+ADDC(R31, 452, R2)    | (9,5) offset=452
+ST(R1, TETRIS_BOARD, R2)
+
+| idle loop
+done:
+BR(done)
