@@ -2,7 +2,7 @@
 
 This assembler is made by Alex, a 2024 CSD graduate for his 50.002 1D project. [You can find his github page here](https://github.com/aleextw).
 
-The assembler expects a separate instruction and data memory files. Place your data and instruction inside `./data`. We assume a 32-bit Beta Instruction length, and 16-bit data length. Instruction and data memory are **separated**.
+The assembler expects a separate instruction and data memory files. Place your data and instruction inside `./data`. We assume a 32-bit Beta Instruction length, and 32-bit data length. Instruction and data memory are **separated**.
 
 Usage:
 
