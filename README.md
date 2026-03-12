@@ -1,8 +1,10 @@
-## Assembler for Beta Assembly
+## Assembler for Beta CPU (32)
 
 This assembler is made by Alex, a 2024 CSD graduate for his 50.002 1D project. [You can find his github page here](https://github.com/aleextw).
 
-The assembler expects a separate instruction and data memory files. Place your data and instruction inside `./data`. We assume a 32-bit Beta Instruction length, and 32-bit data length. Instruction and data memory are **separated**.
+### Usage
+
+It expects a separate instruction and data memory files. Place your data and instruction inside `./data`. We assume a 32-bit Beta Instruction length, and 32-bit data length. Instruction and data memory are **separated**.
 
 Usage:
 
@@ -20,17 +22,19 @@ python assembler_wrapper.py files/test -b
 python assembler_wrapper.py files/test -x
 ```
 
-We reverse the hex dump because the lowest address is at the bottom for Lucid
+We reverse the hex dump because the lowest address is at the bottom for Lucid/Verilog HDL.
 
-Store is TWO cycles because our FPGA RAM requires 2 cycles to write, and make sure it's readable.
-
-## Labels
+### Labels
 
 All labels in instruction and data memory must be put on separate line to be interpreted properly by the assembler. See `./files/test.uasm` and `./files/test_data.uasm` for example.
 
-## System call
+### System call
 
-SVC(code) is used to assemble system call, where SVC OPCODE is 0x01, and code is embedded in the 32 bit constant. The datapath should handle this.
+SVC(code) is used to assemble system call, where SVC OPCODE is 0x01, and code is embedded in the last 16 bit constant (immediate) field.
+
+## About `ST`
+
+`ST` is TWO cycles because our FPGA RAM requires 2 cycles to write, and make sure it's readable.
 
 ## Custom instruction
 
