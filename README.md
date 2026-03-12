@@ -30,7 +30,7 @@ All labels in instruction and data memory must be put on separate line to be int
 
 ## System call
 
-SVC(code) is used to assemble system call, where SVC OPCODE is 0x01, and code is embedded in the 16 bit constant. The datapath should handle this.
+SVC(code) is used to assemble system call, where SVC OPCODE is 0x01, and code is embedded in the 32 bit constant. The datapath should handle this.
 
 ## Custom instruction
 
