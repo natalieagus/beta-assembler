@@ -13,7 +13,6 @@ beta-assembler/
 ├── beta_32.py            # Beta ISA definition: instruction encoders, register names
 ├── helper_functions.py   # Number parsing, two's complement, hex/bin conversion
 ├── shunting_yard.py      # Expression evaluator (handles labels, arithmetic in .uasm)
-├── sim.py                # Interactive Beta CPU simulator (game debugger)
 ├── sim_tetris.py         # Interactive Beta CPU simulator (Tetris board renderer)
 └── files/
     ├── game.uasm         # Peg solitaire game instruction memory
