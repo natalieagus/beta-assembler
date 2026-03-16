@@ -322,12 +322,12 @@ def ld_argument_adjuster(func):
 def LD(RA=31, CC=0, RC=31):
     
     # Have to call twice because the Alchitry AU memory takes 2 clock cycles to store and load
-    return betaopc(0x18, RA, CC, RC) * 2
+    return betaopc(0x18, RA, CC, RC) 
 
 
 def ST(RC, CC, RA=31):
     # Have to call twice because the Alchitry AU memory takes 2 clock cycles to store and load
-    return betaopc(0x19, RA, CC, RC) * 2
+    return betaopc(0x19, RA, CC, RC) 
 
 
 LDR = lambda CC, RC: BETABR(0x1F, R31, RC, CC)
