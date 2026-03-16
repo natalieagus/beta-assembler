@@ -40,8 +40,6 @@ The Beta instruction width is **32 bits**. Data memory width is also **32 bits**
 
 Labels defined in data memory are passed to the instruction assembler so they can be referenced in `LD`, `ST`, and branch instructions. The assembler runs two passes: the first resolves label addresses, the second emits the final encoding.
 
-`LD` and `ST` are each encoded **twice** (two consecutive identical words). This satisfies the BRAM timing requirement used as RAM/Memory Unit. The FPGA RAM takes 2 clock cycles to write and be readable again.
-
 ### Usage
 
 ```bash
@@ -128,56 +126,7 @@ The ISA is defined in `beta_32.py` as Python lambda functions. All instruction e
 
 **Labels** must always be placed on their own line. A label followed by an instruction on the same line will not be parsed correctly. See `files/test.uasm` and `files/test_data.uasm` for working examples.
 
-## `sim_tetris.py` Tetris Board Simulator
-
-Assembles and executes `files/tetris.uasm` + `files/tetris_data.uasm`, rendering the board stored at the `TETRIS_BOARD` data label in real time.
-
-```bash
-cd beta-assembler
-python sim_tetris.py files/tetris
-```
-
-**Board layout:**
-
-- 22 rows × 12 columns
-- Each cell is one `LONG` (4 bytes, 32-bit little-endian) in data memory
-- Cell `(row, col)` is at byte address `TETRIS_BOARD + (row × 12 + col) × 4`
-- Column 0 and column 11 are permanent walls, pre-filled with `1` in `tetris_data.uasm`
-- A cell value of `1` renders as `[]` (green); `0` renders as empty; walls render as `##` (yellow)
-
-**Display:**
-
-- Board on the left (27 terminal columns wide)
-- All 32 registers on the right
-- Disassembly below, showing current PC and any breakpoints
-
-**Keys:**
-
-| Key | Action                                                |
-| --- | ----------------------------------------------------- |
-| `n` | Step one instruction                                  |
-| `r` | Run until breakpoint or HALT                          |
-| `b` | Toggle breakpoint at current PC                       |
-| `c` | Clear all breakpoints                                 |
-| `R` | Reset — PC back to 0, board restored to initial state |
-| `q` | Quit                                                  |
-
-**How the simulator uses the assembler:**
-
-`sim_tetris.py` calls `parse_asm_file()` from `assembler.py` directly. The `.uasm` source is assembled into a list of binary byte strings, which are then reconstructed into 32-bit instruction words and loaded into the simulator's instruction memory. The simulator executes those words as machine code and the source text is never read again after startup. Opcodes are resolved at runtime by encoding a dummy instruction for each operation using `beta_32.py` and extracting the 6-bit opcode field, so the simulator stays in sync with the ISA definition automatically.
-
-## tetris.uasm
-
-Demo program that places three pieces onto the board using `ST` instructions:
-
-- T-piece at rows 1–2, columns 4–6
-- I-piece (vertical) at rows 3–6, column 9
-- S-piece at rows 8–9, columns 4–6
-
-Each `ST(R1, TETRIS_BOARD, R2)` instruction computes the effective address as `TETRIS_BOARD + R2` and writes `R1` (value 1) to that 32-bit cell. `R2` holds the byte offset `(row × 12 + col) × 4`. After all stores complete, the program loops at `done:`.
-
 ## Notes
 
 - The hex output is **reversed** relative to address order to match Lucid's `$readmemh` format on the Alchitry AU.
-- `LD` and `ST` are each assembled as two identical consecutive words. Both simulators detect the duplicate and advance PC by 8 instead of 4 to skip it.
 - `beta_32.py` is the authoritative ISA definition. Do NOT hardcode opcode values anywhere else, always derive them from `beta_32` by encoding a test instruction and reading back the opcode field.
