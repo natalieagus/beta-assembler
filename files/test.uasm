@@ -1,7 +1,7 @@
 start: 
 ADDC(R31, 20, R9) 	| populate 20 to R9, selection of R9 is arbitrary
 
-ST(R9, x, R31)		| store 20 at x, store is TWO cycles because our FPGA RAM requires 2 cycles to write, and make sure it's readable
+ST(R9, x, R31)		| store 20 at x
 ||| assume other code 
 ||| we can't assume that R9 still contains x so we need to reload it 
 LD(R31, x, R1)		| load the content of memory address x to R1
