@@ -321,12 +321,11 @@ def ld_argument_adjuster(func):
 @ld_argument_adjuster
 def LD(RA=31, CC=0, RC=31):
     
-    # Have to call twice because the Alchitry AU memory takes 2 clock cycles to store and load
-    return betaopc(0x18, RA, CC, RC) 
+    # Have to call twice because BRAM has synchronous read
+    return betaopc(0x18, RA, CC, RC) * 2
 
 
 def ST(RC, CC, RA=31):
-    # Have to call twice because the Alchitry AU memory takes 2 clock cycles to store and load
     return betaopc(0x19, RA, CC, RC) 
 
 
