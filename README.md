@@ -126,6 +126,10 @@ The ISA is defined in `beta_32.py` as Python lambda functions. All instruction e
 
 **Labels** must always be placed on their own line. A label followed by an instruction on the same line will not be parsed correctly. See `files/test.uasm` and `files/test_data.uasm` for working examples.
 
+## `LD` as 2 instructions
+
+Any `LD` instruction is automatically written twice. This is to take into account that instruction read is synchronous when implemented on FPGA. See [this](https://natalieagus.github.io/50002/fpga/beta-assembler) guide for more explanation.
+
 ## Notes
 
 - The hex output is **reversed** relative to address order to match Lucid's `$readmemh` format on the Alchitry AU.
